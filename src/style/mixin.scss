@@ -1,0 +1,5 @@
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;//不换行
+  text-overflow: ellipsis;//显示省略符号来代表被修剪的文本
+}
