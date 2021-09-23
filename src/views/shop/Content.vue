@@ -1,28 +1,31 @@
 <template>
   <div class="content">
     <div class="category">
-      <div class="category__item category__item--active">全部商品</div>
-      <div class="category__item">秒杀</div>
-      <div class="category__item">新鲜水果</div>
-      <div class="category__item">休闲食品</div>
-      <div class="category__item">时令蔬菜</div>
-      <div class="category__item">肉蛋家禽</div>
+      <div
+        :class="{'category__item': true, 'category__item--active': currentTab === item.tab}"
+        v-for="item in categories"
+        :key="item.name"
+        @click="() => handleTabClick(item.tab)"
+      >{{item.name}}
+      </div>
     </div>
     <div class="product">
-      <div class="product__item">
-        <img class="product__item__img" src="http://www.dell-lee.com/imgs/vue3/near.png" />
+      <div class="product__item" v-for="item in list" :key="item._id">
+        <img class="product__item__img" :src="item.imgUrl" />
         <div class="product__item__detail">
-          <h4 class="product__item__title">番茄250g/份</h4>
-          <p class="product__item__sales">月售10件</p>
+          <h4 class="product__item__title">{{item.name}}</h4>
+          <p class="product__item__sales">月售 {{item.sales}}件</p>
           <p class="product__item__price">
-            <span class="product__item__yen">&yen;</span>33.6
-            <span class="product__item__origin">&yen;66.6</span>
+            <span class="product__item__yen">&yen;</span>{{item.price}}
+            <span class="product__item__origin">&yen;{{item.oldPrice}}</span>
           </p>
         </div>
         <div class="product__number">
           <span class="product__number__minus">-</span>
-          0
-          <span class="product__number__plus">+</span>
+          {{cartList?.[shopId]?.[item._id]?.count || 0}}
+          <span class="product__number__plus"
+          @click="()=>{ addItemToCart(shopId, item._id, item)}"
+          >+</span>
         </div>
       </div>
     </div>
@@ -30,8 +33,62 @@
 </template>
 
 <script>
-export default {
+import { reactive, toRefs, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
+import { get } from '../../utils/request'
+import { useStore } from 'vuex'
 
+const categories = [
+  { name: '全部商品', tab: 'all' },
+  { name: '秒杀', tab: 'seckill' },
+  { name: '新鲜水果', tab: 'fruit' }
+]
+
+const useTabEffect = () => {
+  const currentTab = ref(categories[0].tab)
+  const handleTabClick = (tab) => {
+    currentTab.value = tab
+  }
+  return { handleTabClick, currentTab }
+}
+
+const useCurrentListEffect = (currentTab, shopId) => {
+  const content = reactive({ list: [] })
+  const getContentData = async () => {
+    const result = await get(`/api/shop/${shopId}/products`, { tab: currentTab.value })
+    if (result?.errno === 0 && result?.data.length) {
+      content.list = result.data
+    }
+  }
+
+  watchEffect(() => { getContentData() })
+
+  const { list } = toRefs(content)
+
+  return { list }
+}
+
+const useCartEffect = () => {
+  const store = useStore()
+  const { cartList } = toRefs(store.state)
+  const addItemToCart = (shopId, productId, productInfo) => {
+    store.commit('addItemToCart', {
+      shopId, productId, productInfo
+    })
+  }
+  return { cartList, addItemToCart }
+}
+
+export default {
+  name: 'Content',
+  setup () {
+    const route = useRoute()
+    const shopId = route.params.id
+    const { handleTabClick, currentTab } = useTabEffect()
+    const { list } = useCurrentListEffect(currentTab, shopId)
+    const { cartList, addItemToCart } = useCartEffect()
+    return { categories, currentTab, list, handleTabClick, cartList, shopId, addItemToCart }
+  }
 }
 </script>
 
