@@ -115,6 +115,7 @@ export default {
       margin: .06rem 0 .16rem 0;
       text-align: center;
       color: $content-fontcolor;
+      font-size: .12rem;
     }
   }
 }
