@@ -1,34 +1,302 @@
 <template>
+  <div class="mask" v-if="showCart" @click="handleCartShowChange"></div>
   <div class="cart">
+    <div class="product" v-if="showCart">
+      <div class="product__header">
+        <div class="product__header__all"
+        @click="() => setCartItemChecked(shopId)"
+        >
+          <span class="product__header__icon iconfont"
+          v-html="allChecked ? '&#xe618;':'&#xe619;'">
+          </span>
+          全选</div>
+        <div class="product__header__clear">
+          <span class="product__header__clear__btn"
+          @click="() => cleanCartProducts(shopId)">清空购物车</span>
+        </div>
+      </div>
+      <template v-for="item in productList" :key="item._id">
+      <div class="product__item" v-if="item.count > 0">
+        <div class="product__item__checked iconfont"
+        v-html="item.check ? '&#xe618;':'&#xe619;'"
+        @click="()=>changeCartItemChecked(shopId,item._id)"
+        ></div>
+        <img class="product__item__img" :src="item.imgUrl" />
+        <div class="product__item__detail">
+          <h4 class="product__item__title">{{item.name}}</h4>
+          <p class="product__item__price">
+            <span class="product__item__yen">&yen;</span>{{item.price}}
+            <span class="product__item__origin">&yen;{{item.oldPrice}}</span>
+          </p>
+        </div>
+        <div class="product__number">
+          <span class="product__number__minus"
+          @click="() => { changeCartItemInfo(shopId, item._id, item, -1) }"
+          >-</span>
+          {{ cartList?.[shopId]?.[item._id]?.count || 0 }}
+          <span class="product__number__plus"
+          @click="() => { changeCartItemInfo(shopId, item._id, item, 1) }"
+          >+</span>
+        </div>
+      </div>
+      </template>
+    </div>
     <div class="check">
       <div class="check__icon">
         <img
           src="http://www.dell-lee.com/imgs/vue3/basket.png"
           class="check__icon__img"
+          @click="handleCartShowChange"
         />
-        <div class="check__icon__tag">1</div>
+        <div class="check__icon__tag">{{total}}</div>
       </div>
       <div class="check__info">
-        总计：<span class="check__info__price">&yen;127</span>
+        总计：<span class="check__info__price">&yen;{{price}}</span>
       </div>
-      <div class="check__btn">去结算</div>
+      <div class="check__btn">
+        <router-link :to="{name:'orderCreation'}">
+        去结算
+        </router-link>
+        </div>
     </div>
   </div>
 </template>
 
 <script>
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
+import { computed, ref } from 'vue'
+import { useCommonCartEffect } from './commonCartEffect'
+
+const useCartEffect = (shopId) => {
+  const { changeCartItemInfo, cartList } = useCommonCartEffect()
+  const store = useStore()
+
+  const changeCartItemChecked = (shopId, productId) => {
+    store.commit('changeCartItemChecked', { shopId, productId })
+  }
+
+  const cleanCartProducts = (shopId) => {
+    store.commit('cleanCartProducts', { shopId })
+  }
+
+  const setCartItemChecked = (shopId) => {
+    store.commit('setCartItemChecked', { shopId })
+  }
+
+  const total = computed(() => {
+    const productInfo = cartList[shopId]
+    let count = 0
+    if (productInfo) {
+      for (const i in productInfo) {
+        count += productInfo[i].count
+      }
+    }
+    return count
+  })
+  const price = computed(() => {
+    const productInfo = cartList[shopId]
+    let count = 0
+    if (productInfo) {
+      for (const i in productInfo) {
+        if (productInfo[i].check) {
+          count += productInfo[i].count * productInfo[i].price
+        }
+      }
+    }
+    return count.toFixed(2)
+  })
+  const allChecked = computed(() => {
+    const productInfo = cartList[shopId]
+    let result = true
+    if (productInfo) {
+      for (const i in productInfo) {
+        if (productInfo[i].count > 0 && !productInfo[i].check) {
+          result = false
+        }
+      }
+    }
+    return result
+  })
+  const productList = computed(() => {
+    const productList = cartList[shopId] || []
+    return productList
+  })
+  return {
+    allChecked,
+    cartList,
+    total,
+    price,
+    productList,
+    changeCartItemInfo,
+    changeCartItemChecked,
+    cleanCartProducts,
+    setCartItemChecked
+  }
+}
+
+const toggleCartEffect = () => {
+  const showCart = ref(false)
+  const handleCartShowChange = () => {
+    showCart.value = !showCart.value
+  }
+  return { showCart, handleCartShowChange }
+}
+
 export default {
-  name: 'Cart'
+  name: 'Cart',
+  setup () {
+    const route = useRoute()
+    const shopId = route.params.id
+    const {
+      total, price, productList, cartList, allChecked, setCartItemChecked,
+      changeCartItemInfo, changeCartItemChecked, cleanCartProducts
+    } = useCartEffect(shopId)
+    const { showCart, handleCartShowChange } = toggleCartEffect()
+    return {
+      showCart,
+      allChecked,
+      cartList,
+      total,
+      price,
+      productList,
+      changeCartItemInfo,
+      shopId,
+      changeCartItemChecked,
+      cleanCartProducts,
+      setCartItemChecked,
+      handleCartShowChange
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '../../style/viriables.scss';
+@import '../../style/mixins.scss';
+
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: rgba(0, 0, 0, .5);
+  z-index: 1;
+}
 .cart {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 2;
+  background: #fff;
+}
+.product {
+  overflow-y: scroll;
+  flex: 1;
+  background: #FFF;
+  &__header {
+    display: flex;
+    line-height: .52rem;
+    border-bottom: 1px solid #F1F1F1;
+    font-size: .14rem;
+    color: #333;
+    &__all {
+      width: .64rem;
+      margin-left: .18rem;
+    }
+    &__icon {
+      display: inline-block;
+      color: #0091FF;
+      font-size: .2rem;
+      vertical-align:top;
+      margin-right: .1rem;
+    }
+    &__clear {
+      flex: 1;
+      margin-right: .16rem;
+      text-align: right;
+      &__btn {
+        display: inline-block;
+      }
+    }
+  }
+  &__item {
+    position: relative;
+    display: flex;
+    padding: .12rem 0;
+    margin: 0 .16rem;
+    border-bottom: .01rem solid $content-bgColor;
+    &__checked {
+      line-height: .5rem;
+      margin-right: .2rem;
+      color: #0091FF;
+      font-size: .2rem;
+    }
+    &__detail {
+      overflow: hidden;
+    }
+    &__img {
+      width: .46rem;
+      height: .46rem;
+      margin-right: .16rem;
+    }
+    &__title {
+      margin: 0;
+      line-height: .2rem;
+      font-size: .14rem;
+      color: $content-fontcolor;
+      @include ellipsis;
+    }
+    &__sales {
+      margin: .06rem 0;
+      font-size: .12rem;
+      color: $content-fontcolor;
+    }
+    &__price {
+      margin: .06rem 0 0 0;
+      line-height: .2rem;
+      font-size: .14rem;
+      color: $hightlight-fontColor;
+    }
+    &__yen {
+      font-size: .12rem;
+    }
+    &__origin {
+      margin-left: .06rem;
+      line-height: .2rem;
+      font-size: .12rem;
+      color: $light-fontColor;
+      text-decoration: line-through;
+    }
+    .product__number {
+      position: absolute;
+      right: 0;
+      bottom: .26rem;
+      &__minus, &__plus
+      {
+        display: inline-block;
+        width: .2rem;
+        height: .2rem;
+        line-height: .16rem;;
+        border-radius: 50%;
+        font-size: .2rem;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      &__minus {
+        border: .01rem solid $medium-fontColor;
+        color: $medium-fontColor;
+        margin-right: .05rem;
+      }
+      &__plus {
+        background: $btn-bgColor;
+        color: $bgColor;
+        margin-left: .05rem;
+      }
+    }
+  }
 }
 .check {
   display: flex;
@@ -46,17 +314,19 @@ export default {
     }
     &__tag {
       position: absolute;
-      right: .2rem;
+      left: .46rem;
       top: .04rem;
-      width: .2rem;
+      min-width: .2rem;
+      padding: 0 .04rem;
       height: .2rem;
       line-height: .2rem;
       background-color: $hightlight-fontColor;
-      border-radius: 50%;
+      border-radius: .1rem;
       font-size: .12rem;
       text-align: center;
       color: #fff;
       transform: scale(.5);
+      transform-origin: left center;
     }
   }
   &__info {
@@ -75,6 +345,10 @@ export default {
     text-align: center;
     color: #FFF;
     font-size: .14rem;
+    a {
+      text-decoration:none;
+      color: #fff;
+    }
   }
 }
 </style>

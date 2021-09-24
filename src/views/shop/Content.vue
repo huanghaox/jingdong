@@ -21,10 +21,12 @@
           </p>
         </div>
         <div class="product__number">
-          <span class="product__number__minus">-</span>
-          {{cartList?.[shopId]?.[item._id]?.count || 0}}
+          <span class="product__number__minus"
+          @click="() => { changeCartItemInfo(shopId, item._id, item, -1) }"
+          >-</span>
+          {{ cartList?.[shopId]?.[item._id]?.count || 0 }}
           <span class="product__number__plus"
-          @click="()=>{ addItemToCart(shopId, item._id, item)}"
+          @click="() => { changeCartItemInfo(shopId, item._id, item, 1) }"
           >+</span>
         </div>
       </div>
@@ -36,7 +38,7 @@
 import { reactive, toRefs, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { get } from '../../utils/request'
-import { useStore } from 'vuex'
+import { useCommonCartEffect } from './commonCartEffect'
 
 const categories = [
   { name: '全部商品', tab: 'all' },
@@ -68,17 +70,6 @@ const useCurrentListEffect = (currentTab, shopId) => {
   return { list }
 }
 
-const useCartEffect = () => {
-  const store = useStore()
-  const { cartList } = toRefs(store.state)
-  const addItemToCart = (shopId, productId, productInfo) => {
-    store.commit('addItemToCart', {
-      shopId, productId, productInfo
-    })
-  }
-  return { cartList, addItemToCart }
-}
-
 export default {
   name: 'Content',
   setup () {
@@ -86,8 +77,8 @@ export default {
     const shopId = route.params.id
     const { handleTabClick, currentTab } = useTabEffect()
     const { list } = useCurrentListEffect(currentTab, shopId)
-    const { cartList, addItemToCart } = useCartEffect()
-    return { categories, currentTab, list, handleTabClick, cartList, shopId, addItemToCart }
+    const { changeCartItemInfo, cartList } = useCommonCartEffect()
+    return { categories, currentTab, list, handleTabClick, shopId, changeCartItemInfo, cartList }
   }
 }
 </script>
@@ -176,6 +167,7 @@ export default {
         border-radius: 50%;
         font-size: .2rem;
         text-align: center;
+        box-sizing: border-box;
       }
       &__minus {
         border: .01rem solid $medium-fontColor;
@@ -185,7 +177,7 @@ export default {
       &__plus {
         background: $btn-bgColor;
         color: $bgColor;
-        margin-left: .05rem;
+        margin-left: .1rem;
       }
     }
   }
