@@ -1,5 +1,6 @@
 import { useStore } from 'vuex'
-export const useCommonCartEffect = () => {
+import { computed } from 'vue'
+export const useCommonCartEffect = (shopId) => {
   const store = useStore()
   const cartList = store.state.cartList
   const changeCartItemInfo = (shopId, productId, productInfo, num) => {
@@ -7,5 +8,9 @@ export const useCommonCartEffect = () => {
       shopId, productId, productInfo, num
     })
   }
-  return { changeCartItemInfo, cartList }
+  const productList = computed(() => {
+    const productList = cartList[shopId]?.productList || []
+    return productList
+  })
+  return { changeCartItemInfo, cartList, productList }
 }
