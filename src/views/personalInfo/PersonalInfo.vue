@@ -1,8 +1,8 @@
 <template>
   <div class="wapper">
-
+    123
   </div>
-  <Docker/>
+  <Docker :currentIndex="3"/>
 </template>
 
 <script>
