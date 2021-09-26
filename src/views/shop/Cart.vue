@@ -15,8 +15,7 @@
           @click="() => cleanCartProducts(shopId)">清空购物车</span>
         </div>
       </div>
-      <template v-for="item in productList" :key="item._id">
-      <div class="product__item" v-if="item.count > 0">
+      <div class="product__item" v-for="item in productList" :key="item._id">
         <div class="product__item__checked iconfont"
         v-html="item.check ? '&#xe618;':'&#xe619;'"
         @click="()=>changeCartItemChecked(shopId,item._id)"
@@ -39,7 +38,6 @@
           >+</span>
         </div>
       </div>
-      </template>
     </div>
     <div class="check">
       <div class="check__icon">
@@ -53,7 +51,7 @@
       <div class="check__info">
         总计：<span class="check__info__price">&yen;{{calculations.price}}</span>
       </div>
-      <div class="check__btn">
+      <div class="check__btn" v-if="calculations.total > 0">
         <router-link :to="{path:`/OrderConfirmation/${shopId}`}">
         去结算
         </router-link>
@@ -65,11 +63,11 @@
 <script>
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useCommonCartEffect } from '../../effects/cartEffects'
 
 const useCartEffect = (shopId) => {
-  const { changeCartItemInfo, cartList, productList } = useCommonCartEffect(shopId)
+  const { changeCartItemInfo, cartList, productList, calculations } = useCommonCartEffect(shopId)
   const store = useStore()
 
   const changeCartItemChecked = (shopId, productId) => {
@@ -84,24 +82,6 @@ const useCartEffect = (shopId) => {
     store.commit('setCartItemChecked', { shopId })
   }
 
-  const calculations = computed(() => {
-    const productList = cartList[shopId]?.productList
-    const result = { total: 0, price: 0, allChecked: true }
-    if (productList) {
-      for (const i in productList) {
-        const product = productList[i]
-        result.total += product.count
-        if (product.check) {
-          result.price += product.count * product.price
-        }
-        if (product.count > 0 && !product.check) {
-          result.allChecked = false
-        }
-      }
-    }
-    result.price = result.price.toFixed(2)
-    return result
-  })
   return {
     cartList,
     calculations,
@@ -327,4 +307,5 @@ export default {
     }
   }
 }
+
 </style>

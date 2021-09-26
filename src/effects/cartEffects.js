@@ -8,9 +8,41 @@ export const useCommonCartEffect = (shopId) => {
       shopId, productId, productInfo, num
     })
   }
-  const productList = computed(() => {
-    const productList = cartList[shopId]?.productList || []
-    return productList
+  const shopName = computed(() => {
+    const shopName = cartList[shopId].shopName || ''
+    return shopName
   })
-  return { changeCartItemInfo, cartList, productList }
+
+  const calculations = computed(() => {
+    const productList = cartList[shopId]?.productList
+    const result = { total: 0, price: 0, allChecked: true }
+    if (productList) {
+      for (const i in productList) {
+        const product = productList[i]
+        result.total += product.count
+        if (product.check) {
+          result.price += product.count * product.price
+        }
+        if (product.count > 0 && !product.check) {
+          result.allChecked = false
+        }
+      }
+    }
+    result.price = result.price.toFixed(2)
+    return result
+  })
+
+  const productList = computed(() => {
+    const notEmptyProductList = {}
+    const productList = cartList[shopId]?.productList
+    for (const i in productList) {
+      const product = productList[i]
+      if (product.count > 0) {
+        notEmptyProductList[i] = product
+      }
+    }
+    return notEmptyProductList
+  })
+
+  return { changeCartItemInfo, cartList, productList, shopName, calculations }
 }
