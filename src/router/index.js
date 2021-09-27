@@ -48,6 +48,21 @@ const routes = [
       const { isLogin } = localStorage
       isLogin ? next({ name: 'Home' }) : next()
     }
+  },
+  {
+    path: '/myAddressList',
+    name: 'MyAddressList',
+    component: () => import(/* webpackChunkName: "myAddressList" */ '../views/myAddressList/MyAddressList.vue')
+  },
+  {
+    path: '/upsertAddress',
+    name: 'UpsertAddress',
+    component: () => import(/* webpackChunkName: "upsertAddress" */ '../views/upsertAddress/UpsertAddress.vue')
+  },
+  {
+    path: '/chooseAddressList',
+    name: 'ChooseAddressList',
+    component: () => import(/* webpackChunkName: "chooseAddressList" */ '../views/chooseAddressList/ChooseAddressList.vue')
   }
   // {
   //   path: '/about',
