@@ -29,13 +29,13 @@
           </p>
         </div>
         <div class="product__number">
-          <span class="product__number__minus"
+          <span class="product__number__minus iconfont"
           @click="() => { changeCartItemInfo(shopId, item._id, item, -1) }"
-          >-</span>
+          >&#xe66d;</span>
           {{ cartList?.[shopId]?.productList?.[item._id]?.count || 0 }}
-          <span class="product__number__plus"
+          <span class="product__number__plus iconfont"
           @click="() => { changeCartItemInfo(shopId, item._id, item, 1) }"
-          >+</span>
+          >&#xe653;</span>
         </div>
       </div>
     </div>
@@ -155,7 +155,7 @@ export default {
   &__header {
     display: flex;
     line-height: .52rem;
-    border-bottom: 1px solid #F1F1F1;
+    border-bottom: .01rem solid #F1F1F1;
     font-size: .14rem;
     color: #333;
     &__all {
@@ -229,26 +229,18 @@ export default {
     .product__number {
       position: absolute;
       right: 0;
-      bottom: .26rem;
-      &__minus, &__plus
-      {
-        display: inline-block;
-        width: .2rem;
-        height: .2rem;
-        line-height: .16rem;;
-        border-radius: 50%;
-        font-size: .2rem;
-        text-align: center;
-        box-sizing: border-box;
-      }
+      bottom: .12rem;
+      line-height: .18rem;
       &__minus {
-        border: .01rem solid $medium-fontColor;
+        position: relative;
+        top: .02rem;
         color: $medium-fontColor;
         margin-right: .05rem;
       }
       &__plus {
-        background: $btn-bgColor;
-        color: $bgColor;
+        position: relative;
+        top: .02rem;
+        color: $btn-bgColor;
         margin-left: .05rem;
       }
     }

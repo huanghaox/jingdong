@@ -50,19 +50,17 @@ const routes = [
     }
   },
   {
+    path: '/chooseAddressList/:shopId',
+    name: 'ChooseAddressList',
+    component: () => import(/* webpackChunkName: "chooseAddressList" */ '../views/chooseAddressList/ChooseAddressList')
+  }, {
     path: '/myAddressList',
     name: 'MyAddressList',
-    component: () => import(/* webpackChunkName: "myAddressList" */ '../views/myAddressList/MyAddressList.vue')
-  },
-  {
-    path: '/upsertAddress',
+    component: () => import(/* webpackChunkName: "myAddressList" */ '../views/myAddressList/MyAddressList')
+  }, {
+    path: '/upsertAddress/:id?',
     name: 'UpsertAddress',
-    component: () => import(/* webpackChunkName: "upsertAddress" */ '../views/upsertAddress/UpsertAddress.vue')
-  },
-  {
-    path: '/chooseAddressList',
-    name: 'ChooseAddressList',
-    component: () => import(/* webpackChunkName: "chooseAddressList" */ '../views/chooseAddressList/ChooseAddressList.vue')
+    component: () => import(/* webpackChunkName: "upsertAddress" */ '../views/upsertAddress/UpsertAddress')
   }
   // {
   //   path: '/about',

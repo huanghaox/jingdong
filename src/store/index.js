@@ -93,6 +93,9 @@ export default createStore({
     },
     clearCartData (state, shopId) {
       state.cartList[shopId].productList = {}
+    },
+    changeAddressList (state, addressList) {
+      state.addressList.splice(0, state.addressList.length, ...addressList)
     }
   },
   actions: {

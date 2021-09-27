@@ -14,7 +14,7 @@
           <span class="top__receiver__info__name">林公子（先生）</span>
           <span class="top__receiver__info__name">123456789</span>
         </div>
-        <div class="iconfont top__receiver__icon">&#xe6f2;</div>
+        <div class="iconfont top__receiver__icon">&#xe602;</div>
       </div>
     </div>
 </template>
@@ -43,7 +43,7 @@ export default {
   background-repeat: no-repeat;
   &__header {
     position: relative;
-    padding-top: .26rem;
+    padding-top: .2rem;
     line-height: .24rem;
     color: $bgColor;
     text-align: center;
